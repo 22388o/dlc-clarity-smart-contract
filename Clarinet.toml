@@ -1,0 +1,6 @@
+[project]
+name = "DLC-Clarity-Smart-Contract"
+
+[contracts.discreet-log-storage]
+path = "contracts/discreet-log-storage.clar"
+depends_on = []

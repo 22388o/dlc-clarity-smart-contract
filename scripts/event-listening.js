@@ -2,6 +2,7 @@
 
 import { connectWebSocketClient } from '@stacks/blockchain-api-client';
 import fetch from "node-fetch";
+import {deserializeCV, cvToValue} from "@stacks/transactions";
 
 const URLAPI = 'https://stacks-node-api.testnet.stacks.co/extended/v1/tx/';
 
@@ -30,22 +31,9 @@ function fetchTxAndExtractPrintEvent(txId) {
         .finally(() => {
             // extracting print event (it can have multiple print events, 
             //but since we know we only have 1 currently we can safely access it at 0 index)
-            const event = tx.events[0].contract_log.value.repr;
-            // value is a tuple in string format
-            console.log(event);
-            // parsing the tuple string
-            parsePrintEvent(event);
+            const event = tx.events[0].contract_log.value.hex;
+
+            const tuple = deserializeCV(event);
+            console.log(cvToValue(tuple));
         });
-}
-
-function parsePrintEvent(event) {
-    const parsed = event.replace(/\(|\)|tuple/g, '').replace(/-/g, '_').trim().split(' ');
-
-    const data = {};
-
-    for (let index = 0; index < parsed.length; index += 2) {
-        data[parsed[index]] = parsed[index + 1]
-    }
-
-    console.log(data);
 }

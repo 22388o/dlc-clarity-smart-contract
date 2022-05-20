@@ -25,7 +25,7 @@ const txOptions = {
   validateWithAbi: true,
   network,
   fee: 100000,
-  anchorMode: AnchorMode.OffChainOnly,
+  anchorMode: 1,
 };
 
 const transaction = await makeContractCall(txOptions);

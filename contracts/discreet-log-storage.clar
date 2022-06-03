@@ -33,7 +33,7 @@
 (define-read-only (get-dlc (uuid (buff 8)))
   (map-get? dlcs uuid))
 
-;;opens a new dlc
+;;opens a new dlc - only called by the dlc.link contract owner
 (define-public (open-new-dlc (uuid (buff 8)) (asset (buff 32)) (closing-time uint) (emergency-refund-time uint) (creator principal))
   (begin
     (asserts! (is-eq contract-owner tx-sender) err-unauthorised)    ;;check if the caller is the owner
@@ -48,7 +48,7 @@
       creator: creator })
     (nft-mint? open-dlc uuid .discreet-log-storage))) ;;mint an open-dlc nft to keep track of open dlcs
 
-;;emits a print event
+;;emits a print event to notify the dlc.link infrastructure to create a new DLC
 (define-public (create-dlc (asset (buff 32)) (closing-time uint) (emergency-refund-time uint))
   (begin 
     (print {

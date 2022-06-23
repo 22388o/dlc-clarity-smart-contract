@@ -23,7 +23,8 @@
     status: (optional uint),
     actual-closing-time: uint,
     emergency-refund-time: uint,
-    creator: principal
+    creator: principal,
+    outcome: (optional bool)
 	})
 
 ;;HELPERS
@@ -45,13 +46,21 @@
       status: none, 
       actual-closing-time: u0, 
       emergency-refund-time: emergency-refund-time,
-      creator: creator })
+      creator: creator,
+      outcome: none })
+    (print {
+      uuid: uuid,
+      asset: asset, 
+      closing-time: closing-time, 
+      emergency-refund-time: emergency-refund-time,
+      creator: creator}) ;;creator is going to be the tx-sender
     (nft-mint? open-dlc uuid .discreet-log-storage))) ;;mint an open-dlc nft to keep track of open dlcs
 
 ;;emits a print event to notify the dlc.link infrastructure to create a new DLC
-(define-public (create-dlc (asset (buff 32)) (closing-time uint) (emergency-refund-time uint))
+(define-public (create-dlc (uuid (buff 8)) (asset (buff 32)) (closing-time uint) (emergency-refund-time uint))
   (begin 
     (print {
+      uuid: uuid,
       asset: asset, 
       closing-time: closing-time, 
       emergency-refund-time: emergency-refund-time,
@@ -59,19 +68,25 @@
     (ok true)))
 
 ;;normal dlc close
-(define-public (close-dlc (uuid (buff 8)))
-  (let (
-    (dlc (unwrap! (get-dlc uuid) err-unknown-dlc)) ;;local variable for the dlc asked, throw err if unknown uuid passed
-    (block-timestamp (get-last-block-timestamp))   ;;last block timestamp
+(define-public (close-dlc (uuid (buff 8)) (outcome bool))
+  (let 
+    (
+      (dlc (unwrap! (get-dlc uuid) err-unknown-dlc)) ;;local variable for the dlc asked, throw err if unknown uuid passed
+      (block-timestamp (get-last-block-timestamp))   ;;last block timestamp
     )
     (asserts! (>= block-timestamp (get closing-time dlc)) err-not-reached-closing-time) ;;check if block-timestamp passed the closing time specified in the dlc
     (asserts! (is-none (get status dlc)) err-already-closed)    ;;check if its already closed or not
     (asserts! (or (is-eq contract-owner tx-sender) (is-eq (get creator dlc) tx-sender)) err-unauthorised) ;;check if the caller is the contract owner or the creator
-    (map-set dlcs uuid (merge dlc { status: (some u1), actual-closing-time: block-timestamp })) ;;set the status and the actual-closing-time on our dlc
-    (nft-burn? open-dlc uuid .discreet-log-storage))) ;;burn the open-dlc nft related to the UUID
+    (map-set dlcs uuid (merge dlc { status: (some u1), actual-closing-time: block-timestamp, outcome: (some outcome) })) ;;set the status and the actual-closing-time on our dlc
+    (print {
+      uuid: uuid,
+      outcome: outcome})
+    (nft-burn? open-dlc uuid .discreet-log-storage) ;;burn the open-dlc nft related to the UUID
+      )) 
+      
 
 ;;early dlc close (very similar to close-dlc)
-(define-public (early-close-dlc (uuid (buff 8)))
+(define-public (early-close-dlc (uuid (buff 8)) (outcome bool))
   (let (
     (dlc (unwrap! (get-dlc uuid) err-unknown-dlc))
     (block-timestamp (get-last-block-timestamp))
@@ -79,7 +94,10 @@
     (asserts! (< block-timestamp (get closing-time dlc)) err-already-passed-closing-time) ;;checl if block-timestamp is smaller than closing time
     (asserts! (is-none (get status dlc)) err-already-closed)
     (asserts! (or (is-eq contract-owner tx-sender) (is-eq (get creator dlc) tx-sender)) err-unauthorised)
-    (map-set dlcs uuid (merge dlc { status: (some u0), actual-closing-time: block-timestamp })) ;;status is set 0, indicating early close
+    (map-set dlcs uuid (merge dlc { status: (some u0), actual-closing-time: block-timestamp, outcome: (some outcome) })) ;;status is set 0, indicating early close
+    (print {
+      uuid: uuid,
+      outcome: outcome})
     (nft-burn? open-dlc uuid .discreet-log-storage))) ;;burn the open-dlc nft related to the UUID
 
 ;; get the status of the DLC by UUID

@@ -6,7 +6,7 @@ import { assertEquals, assertStringIncludes } from 'https://deno.land/std@0.90.0
 const BTChex = "BTC";
 const UUID = "fakeuuid";
 const nftAssetContract = "open-dlc";
-const contractName = "discreet-log-storage";
+const contractName = "discreet-log-storage-v2-1";
 
 function hex2ascii(hexx: string) {
     var hex = hexx.toString();//force conversion

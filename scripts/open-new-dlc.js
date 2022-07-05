@@ -1,4 +1,4 @@
-import { network, senderAddress, senderKey, contractAddress, contractName, UUID } from './common.js'
+import { network, senderAddress, senderKey, contractAddress, contractName, UUID, timestamp } from './common.js'
 import {
   makeContractCall,
   broadcastTransaction,
@@ -16,9 +16,8 @@ const txOptions = {
   functionName: functionName,
   functionArgs: [
     bufferCVFromString(UUID),                                        // uuid
-    bufferCVFromString("BTC"),                                       // asset
-    uintCV(1655911615),                                              // closing-time
-    uintCV(1655911615),                                              // emergency-refund-time
+    uintCV(timestamp),                                              // closing-time
+    uintCV(timestamp),                                              // emergency-refund-time
     standardPrincipalCV("ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM"), // creator
   ],
   senderKey: senderKey,

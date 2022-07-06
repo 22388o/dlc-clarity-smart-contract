@@ -8,7 +8,7 @@ plan:
     - id: 0
       transactions:
         - contract-publish:
-            contract-name: discreet-log-storage-v2-2
+            contract-name: dlc-manager-v1
             expected-sender: ST1PQHQKV0RJXZFY1DGX8MNSNYVE3VGZJSRTPGZGM
-            path: contracts/discreet-log-storage-v2-2.clar
+            path: contracts/dlc-manager.clar
             cost: 46710

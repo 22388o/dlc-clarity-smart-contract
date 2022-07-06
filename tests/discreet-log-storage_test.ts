@@ -5,7 +5,7 @@ import { assertEquals, assertStringIncludes } from 'https://deno.land/std@0.90.0
 
 const UUID = "fakeuuid";
 const nftAssetContract = "open-dlc";
-const contractName = "discreet-log-storage-v2-2";
+const contractName = "dlc-manager-v1";
 
 function hex2ascii(hexx: string) {
     var hex = hexx.toString();//force conversion
@@ -198,7 +198,7 @@ Clarinet.test({
 
         let block = chain.mineBlock([
             Tx.contractCall(contractName, "open-new-dlc", [types.buff(UUID), types.uint(5), types.uint(0), types.principal(wallet_1.address)], deployer.address),
-            Tx.contractCall(contractName, "early-close-dlc", [types.buff(UUID), types.bool(true)], wallet_1.address),
+            Tx.contractCall(contractName, "early-close-dlc", [types.buff(UUID), types.bool(true)], deployer.address),
             Tx.contractCall(contractName, "get-dlc", [types.buff(UUID)], deployer.address)
         ]);
 
@@ -262,8 +262,8 @@ Clarinet.test({
 
         let block = chain.mineBlock([
             Tx.contractCall(contractName, "open-new-dlc", [types.buff(UUID), types.uint(5), types.uint(0), types.principal(wallet_1.address)], deployer.address),
-            Tx.contractCall(contractName, "early-close-dlc", [types.buff(UUID), types.bool(true)], wallet_1.address),
-            Tx.contractCall(contractName, "early-close-dlc", [types.buff(UUID), types.bool(true)], wallet_1.address),
+            Tx.contractCall(contractName, "early-close-dlc", [types.buff(UUID), types.bool(true)], deployer.address),
+            Tx.contractCall(contractName, "early-close-dlc", [types.buff(UUID), types.bool(true)], deployer.address),
         ]);
 
         const err = block.receipts[2].result.expectErr();
@@ -284,24 +284,23 @@ Clarinet.test({
         ]);
 
         const err = block.receipts[1].result.expectErr();
-        assertEquals(err, "u2001"); // err-already-closed
+        assertEquals(err, "u2001"); // err-unauthorized
     },
 });
 
 Clarinet.test({
-    name: "only authorized wallets can early close dlc",
+    name: "only contract owner can early close dlc",
     async fn(chain: Chain, accounts: Map<string, Account>) {
         const deployer = accounts.get('deployer')!;
         const wallet_1 = accounts.get('wallet_1')!;
-        const wallet_2 = accounts.get('wallet_2')!;
 
         let block = chain.mineBlock([
             Tx.contractCall(contractName, "open-new-dlc", [types.buff(UUID), types.uint(5), types.uint(0), types.principal(wallet_1.address)], deployer.address),
-            Tx.contractCall(contractName, "early-close-dlc", [types.buff(UUID), types.bool(true)], wallet_2.address),
+            Tx.contractCall(contractName, "early-close-dlc", [types.buff(UUID), types.bool(true)], wallet_1.address),
         ]);
 
         const err = block.receipts[1].result.expectErr();
-        assertEquals(err, "u2001"); // err-already-closed
+        assertEquals(err, "u2001"); // err-unauthorized
     },
 });
 

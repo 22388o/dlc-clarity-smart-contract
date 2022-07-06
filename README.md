@@ -48,12 +48,16 @@ If you fill in your mnemonic phrase only, you can use the `pk-extractor.js` scri
 export const publicKey = '';
 export const privateKey = '';
 export const mnemonic = '';
+
+export const environment = 'production';
 ```
 `publicKey`: your wallet public key
 
 `privateKey`: your private key corresponds to the public key
 
 `mnemonic`: your menomic seed phrase, as a single string with single-spaces between phrase words
+
+`environment`: for now, 'development' means Mocknet, 'production' is Testnet deployment
 
 ## Tests
 Run

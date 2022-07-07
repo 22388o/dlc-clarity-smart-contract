@@ -1,4 +1,4 @@
-import { network, senderAddress, senderKey, contractAddress, contractName, timestamp } from './common.js'
+import { network, senderAddress, senderKey, contractAddress, contractName, timestamp, UUID } from './common.js'
 
 import {
   makeContractCall,
